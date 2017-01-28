@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private final int interval = 1000;
     private BluetoothHandler mBluetoothHandler;
     private Map<Integer, Float> activeBeacons = new HashMap<>();
+    private Compass compass;
 
 
     private Handler handler = new Handler();
@@ -48,10 +49,10 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                 if(activeBeacons.containsKey(id)){
                     activeBeacons.remove(id);
                 }
-                NumberFormat formatter = new DecimalFormat("#0.0000");
                 activeBeacons.put(id, distance);
             }
         });
+        compass = new Compass(this);
 
         // Start socket setup
         mSocketHandler.connectToSocket(new SocketInterface() {
@@ -74,7 +75,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         });
 
         Button faceBtn = (Button) findViewById(R.id.faceBtn);
-        faceBtn.setOnc
     }
 
     private void startLocalizationUpdates(){
@@ -87,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         public void run() {
 
             Log.d(TAG, "Timer triggered");
+            Log.d(TAG, "Orientation" + String.valueOf(compass.getDirection()));
 
             List<BeaconData> beacons = new LinkedList<>();
             beacons.addAll(mBluetoothHandler.getListFromBeacons(activeBeacons));
