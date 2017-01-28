@@ -1,5 +1,8 @@
 package info.benallen.jeeves.jeevescontroller;
 
+import android.hardware.GeomagneticField;
+import android.location.Location;
+import android.location.LocationListener;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
@@ -25,102 +28,29 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 
-public class MainActivity extends AppCompatActivity implements BeaconConsumer, MonitorNotifier, RangeNotifier {
+public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private final String TAG = "Main";
     private final int interval = 1000;
+    private BlueToothHandler blueToothHandler;
 
-    private BeaconManager mBeaconManager;
-    private Map<Integer,Float> mIdToDistance = new HashMap<Integer, Float>();
 
 
     private Handler handler = new Handler();
     private Gson mGson = new Gson();
     private SocketHandler mSocketHandler = new SocketHandler();
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        mBeaconManager = BeaconManager.getInstanceForApplication(this.getApplicationContext());
-        // Detect the URL frame:
-        mBeaconManager.getBeaconParsers().add(new BeaconParser().
-                setBeaconLayout(BeaconParser.EDDYSTONE_URL_LAYOUT));
-        mBeaconManager.getBeaconParsers().add(new BeaconParser().
-                setBeaconLayout(BeaconParser.EDDYSTONE_TLM_LAYOUT));
-        mBeaconManager.getBeaconParsers().add(new BeaconParser().
-                setBeaconLayout(BeaconParser.EDDYSTONE_UID_LAYOUT));
-        mBeaconManager.bind(this);
-    }
-
-    public void onBeaconServiceConnect() {
-        Region region = new Region("all-beacons-region", null, null, null);
-        try {
-            mBeaconManager.startRangingBeaconsInRegion(region);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-        mBeaconManager.setMonitorNotifier(this);
-        mBeaconManager.setRangeNotifier(this);
-    }
-
-    @Override
-    public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
-        for (Beacon beacon: beacons) {
-            if (beacon.getServiceUuid() == 0xfeaa && beacon.getBeaconTypeCode() == 0x10) {
-                // This is a Eddystone-URL frame
-                String url = UrlBeaconUrlCompressor.uncompress(beacon.getId1().toByteArray());
-                Log.d(TAG, "I see a beacon transmitting a url: " + url + " approximately " + beacon.getDistance() + " meters away.");
-                updateMap(beacon);
-            }
-        }
-        Log.d(TAG,getCurrentData().toString());
-    }
-
-    private void updateMap(Beacon beacon){
-        if(mIdToDistance.containsKey(beacon.getId1().toString())){
-            mIdToDistance.remove(beacon.getId1().toString());
-        }
-        NumberFormat formatter = new DecimalFormat("#0.0000");
-        mIdToDistance.put(beacon.getId1().toInt(),Float.parseFloat(formatter.format(beacon.getDistance())));
-    }
-
-    private List<BeaconData> getCurrentData(){
-        List<BeaconData> beaconDatas = new ArrayList<>();
-        for (int key : mIdToDistance.keySet()){
-            BeaconData beaconData = new BeaconData(key,mIdToDistance.get(key));
-            beaconDatas.add(beaconData);
-        }
-        return beaconDatas;
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        mBeaconManager.unbind(this);
-    }
-
-    @Override
-    public void didEnterRegion(Region region) {
-        Log.d(TAG,"1");
-    }
-
-    @Override
-    public void didExitRegion(Region region) {
-        Log.d(TAG,"2");
-    }
-
-    @Override
-    public void didDetermineStateForRegion(int i, Region region) {
-        Log.d(TAG,"3");
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        blueToothHandler = new BlueToothHandler(this,this);
 
         // Start socket setup
         mSocketHandler.connectToSocket(new SocketInterface() {
@@ -155,7 +85,10 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, M
             Log.d(TAG, "Timer triggered");
 
             // TODO: Get some information from bluetooth
-            List<BeaconData> beacons = getCurrentData();
+//            List<BeaconData> beacons = blueToothHandler.getCurrentData();
+
+            List<BeaconData> beacons = new LinkedList<>();
+//            Log.d(TAG,blueToothHandler.getCurrentData().toString());
 
 
 
@@ -202,6 +135,18 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, M
                 // Do nothing, unknown event
             }
         }
+    }
+
+    @Override
+    public void onBeaconServiceConnect() {
+        Region region = new Region("all-beacons-region", null, null, null);
+        try {
+            blueToothHandler.getmBeaconManager().startRangingBeaconsInRegion(region);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        blueToothHandler.getmBeaconManager().setMonitorNotifier(blueToothHandler);
+        blueToothHandler.getmBeaconManager().setRangeNotifier(blueToothHandler);
     }
 }
 
