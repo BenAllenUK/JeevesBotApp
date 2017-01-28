@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, M
     private final int interval = 1000;
 
     private BeaconManager mBeaconManager;
-    private Map<String,Double> mIdToDistance = new HashMap<String,Double>();
+    private Map<Integer,Float> mIdToDistance = new HashMap<Integer, Float>();
 
 
     private Handler handler = new Handler();
@@ -76,27 +76,24 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, M
                 updateMap(beacon);
             }
         }
-        Log.d(TAG,getCurrentData());
+        Log.d(TAG,getCurrentData().toString());
     }
 
     private void updateMap(Beacon beacon){
         if(mIdToDistance.containsKey(beacon.getId1().toString())){
             mIdToDistance.remove(beacon.getId1().toString());
         }
-        mIdToDistance.put(beacon.getId1().toString(),beacon.getDistance());
+        NumberFormat formatter = new DecimalFormat("#0.0000");
+        mIdToDistance.put(beacon.getId1().toInt(),Float.parseFloat(formatter.format(beacon.getDistance())));
     }
 
-    private String getCurrentData(){
-        StringBuilder stringBuilder = new StringBuilder();
-        NumberFormat formatter = new DecimalFormat("#0.0000");
-        for (String key : mIdToDistance.keySet()){
-            stringBuilder.append("ID:");
-            stringBuilder.append(key);
-            stringBuilder.append(", DIST:");
-            stringBuilder.append(formatter.format(mIdToDistance.get(key)));
-            stringBuilder.append("\n");
+    private List<BeaconData> getCurrentData(){
+        List<BeaconData> beaconDatas = new ArrayList<>();
+        for (int key : mIdToDistance.keySet()){
+            BeaconData beaconData = new BeaconData(key,mIdToDistance.get(key));
+            beaconDatas.add(beaconData);
         }
-        return stringBuilder.toString();
+        return beaconDatas;
     }
 
     @Override
@@ -158,11 +155,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, M
             Log.d(TAG, "Timer triggered");
 
             // TODO: Get some information from bluetooth
-            BeaconData beaconData = new BeaconData(1073, (float) 0.50);
-            List<BeaconData> beacons = new ArrayList<>(1);
+            List<BeaconData> beacons = getCurrentData();
 
-            // Add lots of data to the list
-            beacons.add(beaconData);
 
 
             PositionData myPositionInfo = new PositionData(beacons);
