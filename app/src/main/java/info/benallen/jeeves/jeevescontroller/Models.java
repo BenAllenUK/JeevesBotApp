@@ -20,7 +20,10 @@ interface SocketInterface {
 interface RequestCallback {
     void onSuccess();
     void onError();
+}
 
+interface BluetoothCallback {
+    void onBeaconFound(int i, float distance);
 }
 
 class EventData {

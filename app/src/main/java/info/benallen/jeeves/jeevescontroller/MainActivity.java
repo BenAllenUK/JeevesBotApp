@@ -1,8 +1,5 @@
 package info.benallen.jeeves.jeevescontroller;
 
-import android.hardware.GeomagneticField;
-import android.location.Location;
-import android.location.LocationListener;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
@@ -12,21 +9,14 @@ import android.widget.Toast;
 
 
 import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
 import com.koushikdutta.async.http.WebSocket;
 
-import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
-import org.altbeacon.beacon.BeaconManager;
-import org.altbeacon.beacon.BeaconParser;
-import org.altbeacon.beacon.MonitorNotifier;
-import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
-import org.altbeacon.beacon.utils.UrlBeaconUrlCompressor;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,8 +26,8 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private final String TAG = "Main";
     private final int interval = 1000;
-    private BlueToothHandler blueToothHandler;
-
+    private BluetoothHandler mBluetoothHandler;
+    private Map<Integer, Float> activeBeacons = new HashMap<>();
 
 
     private Handler handler = new Handler();
@@ -50,7 +40,17 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        blueToothHandler = new BlueToothHandler(this,this);
+        // Start bluetooth listings
+        mBluetoothHandler = new BluetoothHandler(this, new BluetoothCallback() {
+            @Override
+            public void onBeaconFound(int id, float distance) {
+                if(activeBeacons.containsKey(id)){
+                    activeBeacons.remove(id);
+                }
+                NumberFormat formatter = new DecimalFormat("#0.0000");
+                activeBeacons.put(id, distance);
+            }
+        });
 
         // Start socket setup
         mSocketHandler.connectToSocket(new SocketInterface() {
@@ -84,13 +84,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 
             Log.d(TAG, "Timer triggered");
 
-            // TODO: Get some information from bluetooth
-//            List<BeaconData> beacons = blueToothHandler.getCurrentData();
-
             List<BeaconData> beacons = new LinkedList<>();
-//            Log.d(TAG,blueToothHandler.getCurrentData().toString());
-
-
+            beacons.addAll(mBluetoothHandler.getListFromBeacons(activeBeacons));
 
             PositionData myPositionInfo = new PositionData(beacons);
 
@@ -126,10 +121,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                 Log.d(TAG, "Will do some position stuff: " + eventData.getPayload());
             }
             case "message": {
-
-                GenericMessage genericMessage = mGson.fromJson((String) eventData.getPayload(), GenericMessage.class);
-
-                Log.d(TAG, "Got a message: " + genericMessage.getMsg());
+                LinkedTreeMap genericMessage = (LinkedTreeMap) eventData.getPayload();
+                Log.d(TAG, "Got a message: " + genericMessage.get("msg"));
             }
             default: {
                 // Do nothing, unknown event
@@ -141,12 +134,12 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     public void onBeaconServiceConnect() {
         Region region = new Region("all-beacons-region", null, null, null);
         try {
-            blueToothHandler.getmBeaconManager().startRangingBeaconsInRegion(region);
+            mBluetoothHandler.getBeaconManager().startRangingBeaconsInRegion(region);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-        blueToothHandler.getmBeaconManager().setMonitorNotifier(blueToothHandler);
-        blueToothHandler.getmBeaconManager().setRangeNotifier(blueToothHandler);
+        mBluetoothHandler.getBeaconManager().setMonitorNotifier(mBluetoothHandler);
+        mBluetoothHandler.getBeaconManager().setRangeNotifier(mBluetoothHandler);
     }
 }
 

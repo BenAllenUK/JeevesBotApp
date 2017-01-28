@@ -34,14 +34,14 @@ import java.util.Map;
  * Created by maartie0 on 28/01/2017.
  */
 
-class BlueToothHandler implements RangeNotifier,MonitorNotifier {
-    private final String TAG = "BlueToothHandler";
+class BluetoothHandler implements RangeNotifier, MonitorNotifier {
+    private final String TAG = "BluetoothHandler";
     private BeaconManager mBeaconManager;
-    private Map<Integer,Float> mIdToDistance = new HashMap<Integer, Float>();
+    private BluetoothCallback mBluetoothHandler;
     private Context context;
 
-    BlueToothHandler(Context context,MainActivity mainActivity){
-        mBeaconManager = BeaconManager.getInstanceForApplication(context);
+    BluetoothHandler(MainActivity mainActivity, BluetoothCallback bluetoothHandler){
+        mBeaconManager = BeaconManager.getInstanceForApplication(mainActivity);
         // Detect the URL frame:
         mBeaconManager.getBeaconParsers().add(new BeaconParser().
                 setBeaconLayout(BeaconParser.EDDYSTONE_URL_LAYOUT));
@@ -50,10 +50,12 @@ class BlueToothHandler implements RangeNotifier,MonitorNotifier {
         mBeaconManager.getBeaconParsers().add(new BeaconParser().
                 setBeaconLayout(BeaconParser.EDDYSTONE_UID_LAYOUT));
         mBeaconManager.bind(mainActivity);
-        this.context = context;
+
+        this.mBluetoothHandler = bluetoothHandler;
+        this.context = mainActivity;
     }
 
-    public BeaconManager getmBeaconManager() {
+    BeaconManager getBeaconManager() {
         return mBeaconManager;
     }
 
@@ -65,28 +67,9 @@ class BlueToothHandler implements RangeNotifier,MonitorNotifier {
                 // This is a Eddystone-URL frame
                 String url = UrlBeaconUrlCompressor.uncompress(beacon.getId1().toByteArray());
                 Log.d(TAG, "I see a beacon transmitting a url: " + url + " approximately " + beacon.getDistance() + " meters away.");
-                updateMap(beacon);
+                mBluetoothHandler.onBeaconFound(beacon.getId1().toInt(), (float)beacon.getDistance());
             }
         }
-        Log.d(TAG,getCurrentData().toString());
-        Log.d(TAG,"6");
-    }
-
-    private void updateMap(Beacon beacon){
-        if(mIdToDistance.containsKey(beacon.getId1().toInt())){
-            mIdToDistance.remove(beacon.getId1().toInt());
-        }
-        NumberFormat formatter = new DecimalFormat("#0.0000");
-        mIdToDistance.put(beacon.getId1().toInt(), (float)beacon.getDistance());
-    }
-
-    public List<BeaconData> getCurrentData(){
-        List<BeaconData> beaconDatas = new ArrayList<>();
-        for (int key : mIdToDistance.keySet()){
-            BeaconData beaconData = new BeaconData(key,mIdToDistance.get(key));
-            beaconDatas.add(beaconData);
-        }
-        return beaconDatas;
     }
 
 
@@ -103,5 +86,14 @@ class BlueToothHandler implements RangeNotifier,MonitorNotifier {
     @Override
     public void didDetermineStateForRegion(int i, Region region) {
 
+    }
+
+    List<BeaconData> getListFromBeacons(Map<Integer, Float> activeBeacons){
+        List<BeaconData> beaconDatas = new ArrayList<>();
+        for (int key : activeBeacons.keySet()){
+            BeaconData beaconData = new BeaconData(key, activeBeacons.get(key));
+            beaconDatas.add(beaconData);
+        }
+        return beaconDatas;
     }
 }
