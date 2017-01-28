@@ -20,6 +20,7 @@ import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.MonitorNotifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
+import org.altbeacon.beacon.service.RunningAverageRssiFilter;
 import org.altbeacon.beacon.utils.UrlBeaconUrlCompressor;
 
 import java.text.DecimalFormat;
@@ -41,6 +42,7 @@ class BluetoothHandler implements RangeNotifier, MonitorNotifier {
     private Context context;
 
     BluetoothHandler(MainActivity mainActivity, BluetoothCallback bluetoothHandler){
+
         mBeaconManager = BeaconManager.getInstanceForApplication(mainActivity);
         // Detect the URL frame:
         mBeaconManager.getBeaconParsers().add(new BeaconParser().
@@ -49,10 +51,16 @@ class BluetoothHandler implements RangeNotifier, MonitorNotifier {
                 setBeaconLayout(BeaconParser.EDDYSTONE_TLM_LAYOUT));
         mBeaconManager.getBeaconParsers().add(new BeaconParser().
                 setBeaconLayout(BeaconParser.EDDYSTONE_UID_LAYOUT));
+
         mBeaconManager.bind(mainActivity);
 
         this.mBluetoothHandler = bluetoothHandler;
         this.context = mainActivity;
+    }
+
+    void destroy(MainActivity mainActivity) {
+        mBeaconManager.unbind(mainActivity);
+        this.mBluetoothHandler = null;
     }
 
     BeaconManager getBeaconManager() {
@@ -61,13 +69,13 @@ class BluetoothHandler implements RangeNotifier, MonitorNotifier {
 
     @Override
     public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
-        Log.d(TAG,"5");
         for (Beacon beacon: beacons) {
             if (beacon.getServiceUuid() == 0xfeaa && beacon.getBeaconTypeCode() == 0x10) {
                 // This is a Eddystone-URL frame
-                String url = UrlBeaconUrlCompressor.uncompress(beacon.getId1().toByteArray());
+                String url = UrlBeaconUrlCompressor.uncompress(beacon.getId1().toByteArray()).replace("http://", "");
+                int id = Integer.parseInt(url);
                 Log.d(TAG, "I see a beacon transmitting a url: " + url + " approximately " + beacon.getDistance() + " meters away.");
-                mBluetoothHandler.onBeaconFound(beacon.getId1().toInt(), (float)beacon.getDistance());
+                mBluetoothHandler.onBeaconFound(id, (float)beacon.getDistance());
             }
         }
     }
