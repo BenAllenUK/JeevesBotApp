@@ -1,11 +1,15 @@
 package info.benallen.jeeves.jeevescontroller;
 
+import android.content.Intent;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -73,8 +77,39 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 
         });
 
+        setEventListeners();
+    }
+
+    private void setEventListeners() {
         Button faceBtn = (Button) findViewById(R.id.faceBtn);
-        faceBtn.setOnc
+        faceBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent newIntent = new Intent(MainActivity.this, FaceActivity.class);
+                startActivity(newIntent);
+            }
+        });
+
+        Button requestBtn = (Button) findViewById(R.id.requestBtn);
+        requestBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditText editText = (EditText) findViewById(R.id.destinationText);
+                final String content = editText.getText().toString();
+
+                mSocketHandler.sendMoveRequest(content, new RequestCallback() {
+                    @Override
+                    public void onSuccess() {
+                        Toast.makeText(MainActivity.this, "Sent to " + content, Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError() {
+                        Toast.makeText(MainActivity.this, "Failed to send", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
     }
 
     private void startLocalizationUpdates(){

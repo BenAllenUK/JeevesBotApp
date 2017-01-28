@@ -14,10 +14,10 @@
         android:text="Requester"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/faceBtn"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="87dp"
-        android:id="@+id/requestBtn" />
+        android:layout_marginTop="51dp"
+        android:id="@+id/requestBtn"
+        android:layout_below="@+id/destinationText"
+        android:layout_centerHorizontal="true" />
 
     <Button
         android:text="Jeeves Face"
@@ -27,4 +27,16 @@
         android:id="@+id/faceBtn"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:ems="10"
+        android:layout_marginTop="50dp"
+        android:id="@+id/destinationText"
+        android:layout_below="@+id/faceBtn"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
+        android:hint="Who would you like to send it to?" />
 </RelativeLayout>
