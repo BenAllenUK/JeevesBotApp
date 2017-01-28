@@ -5,6 +5,7 @@ import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.Toast;
 
 
@@ -71,6 +72,9 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             }
 
         });
+
+        Button faceBtn = (Button) findViewById(R.id.faceBtn);
+        faceBtn.setOnc
     }
 
     private void startLocalizationUpdates(){
