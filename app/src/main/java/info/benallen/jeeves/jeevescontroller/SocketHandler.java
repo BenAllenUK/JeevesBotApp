@@ -88,6 +88,7 @@ public class SocketHandler {
     void sendDebugMove(String command) {
         EventData eventData = new EventData(command, new CommandObject(command));
         String json = mGson.toJson(eventData);
+        Log.d(TAG, "Sending JSON: " + json);
         mWebSocket.send(json);
     }
 }

@@ -2,9 +2,11 @@ package info.benallen.jeeves.jeevescontroller;
 
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -87,7 +89,17 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         leftBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mSocketHandler.sendDebugMove("debug-left");
+                if (mSocketHandler != null) {
+                    mSocketHandler.sendDebugMove("debug-left");
+                }
+
+                if (mArduino != null) {
+                    try {
+                        mArduino.sendData("turn 270");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         });
 
@@ -95,7 +107,17 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         rightBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mSocketHandler.sendDebugMove("debug-right");
+                if (mSocketHandler != null) {
+                    mSocketHandler.sendDebugMove("debug-right");
+                }
+
+                if (mArduino != null) {
+                    try {
+                        mArduino.sendData("turn 090");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         });
 
@@ -103,7 +125,17 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         forwardBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mSocketHandler.sendDebugMove("debug-forward");
+                if (mSocketHandler != null) {
+                    mSocketHandler.sendDebugMove("debug-forward");
+                }
+
+                if (mArduino != null) {
+                    try {
+                        mArduino.sendData("travel 100");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         });
 
@@ -136,6 +168,14 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         ardButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (mArduino != null) {
+                    try {
+                        mArduino.closeBT();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 Arduino myLittleArduino = new Arduino();
 
                 myLittleArduino.findBT();
@@ -146,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                     e.printStackTrace();
                 }
                 try {
-                    myLittleArduino.sendData("testing");
+                    myLittleArduino.sendData("5");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -162,6 +202,61 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             }
         });
 
+        final Button danceBtn = (Button) findViewById(R.id.danceBtn);
+        danceBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mArduino == null) {
+                    Toast.makeText(MainActivity.this, "No Connection", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.start);
+                mp.start();
+
+                danceBtn.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        int delay = 3000;
+
+                        try {
+//                            mArduino.sendData("turn 100");
+//                            SystemClock.sleep(delay);
+                            mArduino.sendData("travel 800");
+                            SystemClock.sleep(delay);
+                            mArduino.sendData("turn 100");
+                            SystemClock.sleep(delay);
+//                            for (int i = 0; i < 3; i++) {
+//                                mArduino.sendData("turn 045");
+//                                SystemClock.sleep(delay);
+//                                mArduino.sendData("travel 050");
+//                                SystemClock.sleep(delay);
+//                                mArduino.sendData("turn 315");
+//                                SystemClock.sleep(delay);
+//                                mArduino.sendData("travel 050");
+//                                SystemClock.sleep(delay);
+//                                mArduino.sendData("turn 045");
+//                                SystemClock.sleep(delay);
+//                                mArduino.sendData("travel 050");
+//                                SystemClock.sleep(delay);
+//                                mArduino.sendData("turn 315");
+//                                SystemClock.sleep(delay);
+//                                mArduino.sendData("travel 050");
+//                                SystemClock.sleep(delay);
+//                            }
+                            MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.finished);
+                            mp.start();
+
+                        } catch (IOException e) {
+                            Log.d(TAG, "Error");
+                            e.printStackTrace();
+                        }
+                    }
+                }, 1000);
+
+            }
+        });
+
         Button connectBtn = (Button) findViewById(R.id.setupBtn);
         connectBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -169,7 +264,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                 EditText nameField = (EditText) findViewById(R.id.identityTxt);
 
                 String identity = nameField.getText().toString();
-                
+
                 // Start socket setup
                 mSocketHandler.connectToSocket(identity, new SocketInterface() {
                     @Override
@@ -242,18 +337,47 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         Log.d(TAG, "Got some response: " + eventData.toString());
 
         switch (eventData.getEvent()) {
-            case "instructions": {
+            case "instruction": {
+                MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.confirm);
+                mp.start();
                 LinkedTreeMap genericMessage = (LinkedTreeMap) eventData.getPayload();
                 String turn = (String) genericMessage.get("turn");
                 String travel = (String) genericMessage.get("travel");
+                Log.d("BOT", "Got cmd: " + genericMessage.toString());
+                int turnVal = Integer.parseInt(turn);
+                turnVal = turnVal % 360;
+                String turnStr = String.format("%03d", turnVal);
+                Log.d("BOT", "Turn string: " + turnStr);
+
+                if (mArduino == null) {
+                    Toast.makeText(MainActivity.this, "No Connection", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
                 try {
-                    mArduino.sendData("turn " + turn);
+
+                    Log.d("BOT", "Turn = " + turnStr);
+                    mArduino.sendData("turn " + turnStr);
+                    SystemClock.sleep(3000);
+                    Log.d("BOT", "Travel = " + travel);
                     mArduino.sendData("travel " + travel);
+                    SystemClock.sleep(3000);
+
                 } catch (IOException e) {
                     Log.d(TAG, "Could not send: " + eventData.getPayload());
                     e.printStackTrace();
                 }
+
+
+
+                AsyncTask.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        SystemClock.sleep(5000);
+                        MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.finished);
+                        mp.start();
+                    }
+                });
 
                 break;
 
@@ -300,6 +424,16 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         super.onDestroy();
 
         mBluetoothHandler.destroy(this);
+
+        // Destory if i can
+        try {
+            if (mArduino == null || mArduino.mmDevice == null) {
+                return;
+            }
+            mArduino.closeBT();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
