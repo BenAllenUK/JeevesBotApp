@@ -40,7 +40,6 @@ public class Arduino extends Activity {
         mmInputStream = mmSocket.getInputStream();
     }
 
-
     /*
         request format:
         "Turn X" - Orientation of Jeeves: where x is the number of degrees from 0 to 360.

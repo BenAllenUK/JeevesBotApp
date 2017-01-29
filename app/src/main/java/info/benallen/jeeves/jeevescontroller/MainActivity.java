@@ -1,6 +1,7 @@
 package info.benallen.jeeves.jeevescontroller;
 
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -20,8 +21,6 @@ import com.koushikdutta.async.http.WebSocket;
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.Region;
-import org.altbeacon.beacon.service.ArmaRssiFilter;
-import org.altbeacon.beacon.service.RssiFilter;
 import org.altbeacon.beacon.service.RunningAverageRssiFilter;
 
 import java.io.IOException;
@@ -36,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private final String TAG = "Main";
     private final int interval = 1000;
     private BluetoothHandler mBluetoothHandler;
+    private Arduino mArduino;
     private Map<Integer, Float> activeBeacons = new ConcurrentHashMap<>();
     private Compass compass;
 
@@ -101,21 +101,40 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     }
 
     private void setEventListeners() {
-        Button faceBtn = (Button) findViewById(R.id.faceBtn);
-        faceBtn.setOnClickListener(new View.OnClickListener() {
+        Button leftBtn = (Button) findViewById(R.id.leftBtn);
+        leftBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent newIntent = new Intent(MainActivity.this, FaceActivity.class);
-                startActivity(newIntent);
+                mSocketHandler.sendDebugMove("debug-left");
             }
         });
 
-        Button requestBtn = (Button) findViewById(R.id.ardBtn);
+        Button rightBtn = (Button) findViewById(R.id.rightBtn);
+        rightBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mSocketHandler.sendDebugMove("debug-right");
+            }
+        });
+
+        Button forwardBtn = (Button) findViewById(R.id.forwardBtn);
+        forwardBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mSocketHandler.sendDebugMove("debug-forward");
+            }
+        });
+
+
+        Button requestBtn = (Button) findViewById(R.id.requestBtn);
         requestBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 EditText editText = (EditText) findViewById(R.id.destinationText);
                 final String content = editText.getText().toString();
+
+                MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.start);
+                mp.start();
 
                 mSocketHandler.sendMoveRequest(content, new RequestCallback() {
                     @Override
@@ -140,6 +159,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                 myLittleArduino.findBT();
                 try {
                     myLittleArduino.openBT();
+                    mArduino = myLittleArduino;
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -209,11 +229,30 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 
         switch (eventData.getEvent()) {
             case "instructions": {
-                Log.d(TAG, "Will do some position stuff: " + eventData.getPayload());
+                LinkedTreeMap genericMessage = (LinkedTreeMap) eventData.getPayload();
+                String turn = (String) genericMessage.get("turn");
+                String travel = (String) genericMessage.get("travel");
+
+                try {
+                    mArduino.sendData("Turn " + turn);
+                    mArduino.sendData("Travel " + travel);
+                } catch (IOException e) {
+                    Log.d(TAG, "Could not send: " + eventData.getPayload());
+                    e.printStackTrace();
+                }
+
             }
             case "message": {
                 LinkedTreeMap genericMessage = (LinkedTreeMap) eventData.getPayload();
                 Log.d(TAG, "Got a message: " + genericMessage.get("msg"));
+
+            }
+            case "finished": {
+                LinkedTreeMap genericMessage = (LinkedTreeMap) eventData.getPayload();
+                Log.d(TAG, "Got a message: " + genericMessage.get("msg"));
+                MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.finished);
+                mp.start();
+
             }
             default: {
                 // Do nothing, unknown event
