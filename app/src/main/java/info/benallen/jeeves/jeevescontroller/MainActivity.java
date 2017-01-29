@@ -20,6 +20,7 @@ import com.koushikdutta.async.http.WebSocket;
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.Region;
+import org.altbeacon.beacon.service.ArmaRssiFilter;
 import org.altbeacon.beacon.service.RunningAverageRssiFilter;
 
 import java.text.DecimalFormat;
@@ -28,13 +29,14 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private final String TAG = "Main";
     private final int interval = 1000;
     private BluetoothHandler mBluetoothHandler;
-    private Map<Integer, Float> activeBeacons = new HashMap<>();
+    private Map<Integer, Float> activeBeacons = new ConcurrentHashMap<>();
     private Compass compass;
 
 
@@ -57,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                 }
                 activeBeacons.put(id, distance);
 
-//                updateDebugText();
+                updateDebugText();
             }
         });
 
@@ -160,6 +162,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                 }
             });
 
+            activeBeacons.clear();
+
             // And repeat...
             handler.postAtTime(runnable, System.currentTimeMillis()+interval);
             handler.postDelayed(runnable, interval);
@@ -196,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-        BeaconManager.setRssiFilterImplClass(RunningAverageRssiFilter.class);
+        BeaconManager.setRssiFilterImplClass(ArmaRssiFilter.class);
         RunningAverageRssiFilter.setSampleExpirationMilliseconds(1000l);
         mBluetoothHandler.getBeaconManager().setMonitorNotifier(mBluetoothHandler);
         mBluetoothHandler.getBeaconManager().setRangeNotifier(mBluetoothHandler);
