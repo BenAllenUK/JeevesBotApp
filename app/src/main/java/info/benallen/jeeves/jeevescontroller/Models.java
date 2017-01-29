@@ -45,6 +45,11 @@ class EventData {
         this.payload = requestObject;
     }
 
+    EventData(String event, CommandObject requestObject) {
+        this.event = event;
+        this.payload = requestObject;
+    }
+
 
     EventData(String event) {
         this.event = event;
@@ -162,5 +167,13 @@ class GenericMessage {
         return "GenericMessage{" +
                 "msg='" + msg + '\'' +
                 '}';
+    }
+}
+
+class CommandObject {
+    private String command;
+
+    public CommandObject(String command) {
+        this.command = command;
     }
 }

@@ -83,4 +83,11 @@ public class SocketHandler {
 
         Log.d(TAG, "Setup up with identity: " + name);
     }
+
+    // Debug Command
+    void sendDebugMove(String command) {
+        EventData eventData = new EventData(command, new CommandObject(command));
+        String json = mGson.toJson(eventData);
+        mWebSocket.send(json);
+    }
 }
