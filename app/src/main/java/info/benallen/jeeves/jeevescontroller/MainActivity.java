@@ -442,13 +442,30 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     public void speechEndedSuccesfullEvent(ArrayList<Enum> commands){
         Button requestBtn = (Button) findViewById(R.id.ardBtn);
         EditText editText = (EditText) findViewById(R.id.destinationText);
-        for (Enum receiver:commands){
-            if(receiver instanceof SpeechAnalyser.Subject){
-                editText.setText(String.valueOf(receiver.ordinal()));
+        String receiver = "";
+        for (Enum receiverEnum :commands){
+            if(receiverEnum instanceof SpeechAnalyser.Subject){
+                editText.setText(String.valueOf(receiverEnum.ordinal()));
+                receiver = String.valueOf(receiverEnum.ordinal());
             }
         }
 
-//        requestBtn.performClick();
+        final String foundName = receiver;
+
+        MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.start);
+        mp.start();
+
+        mSocketHandler.sendMoveRequest(foundName, new RequestCallback() {
+            @Override
+            public void onSuccess() {
+                Toast.makeText(MainActivity.this, "Sent to " + foundName, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError() {
+                Toast.makeText(MainActivity.this, "Failed to send", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         Log.d("Speech",commands.toString());
     }
