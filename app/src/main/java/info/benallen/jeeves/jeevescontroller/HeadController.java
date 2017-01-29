@@ -8,6 +8,15 @@ import android.util.Log;
 
 import java.io.IOException;
 
+import info.benallen.jeeves.jeevescontroller.face.Eye;
+import info.benallen.jeeves.jeevescontroller.face.FaceScreen;
+import info.benallen.jeeves.jeevescontroller.face.MiddleFingerScreen;
+import info.benallen.jeeves.jeevescontroller.face.emotion.AngryEmotion;
+import info.benallen.jeeves.jeevescontroller.face.emotion.HappyEmotion;
+import info.benallen.jeeves.jeevescontroller.face.emotion.NeutralEmotion;
+import info.benallen.jeeves.jeevescontroller.face.emotion.SurprisedEmotion;
+import info.benallen.jeeves.jeevescontroller.face.emotion.UnhappyEmotion;
+
 /**
  * Created by benallen on 29/01/2017.
  */
