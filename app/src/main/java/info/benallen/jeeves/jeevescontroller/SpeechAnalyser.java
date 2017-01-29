@@ -15,17 +15,11 @@ public class SpeechAnalyser {
         LOGAN, MIKE
     }
 
-    public enum MagicWord {
-        PLEASE
-    }
 
     public enum Entertain {
         DANCE
     }
 
-    public enum Return {
-        RETURN
-    }
 
     public ArrayList<Enum> getmCommands() {
         return mCommands;
@@ -70,11 +64,9 @@ public class SpeechAnalyser {
         for (Enum command: commands){
             if(command instanceof Subject){
                 subject = true;
-            } else if (command instanceof MagicWord){
-                magicWord = true;
             }
         }
-        return subject && magicWord;
+        return subject;
     }
 
 
@@ -85,14 +77,8 @@ public class SpeechAnalyser {
             for (String word : brokenString) {
                 word = word.toUpperCase();
                 addSubject(commands,word);
-                if ("PLEASE".equals(word) || "TEASE".equals(word) || "BEES".equals(word) || "DEES".equals(word) || "CHEESE".equals(word) || "BREEZE".equals(word)) {
-                    commands.add(MagicWord.PLEASE);
-                }
                 if("DANCE".equals(word) || "DANSE".equals(word) || "BOUNCE".equals(word) || "LANCE".equals(word) || "CHANCE".equals(word) || "TRANS".equals(word)){
                     commands.add(Entertain.DANCE);
-                }
-                if("RETURN".equals(word) || "BITTERN".equals(word) || "RETURNS".equals(word)){
-                    commands.add(Return.RETURN);
                 }
             }
         }
@@ -119,11 +105,6 @@ public class SpeechAnalyser {
             if (command instanceof Subject){
                 temp.remove(command);
                 temp.add(0,command);
-            }
-        }
-        for (Enum command : commands){
-            if (command instanceof MagicWord){
-                temp.remove(command);
             }
         }
         return temp;
