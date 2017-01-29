@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-public class MainActivity extends AppCompatActivity implements BeaconConsumer, View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private final String TAG = "Main";
     private final int interval = 1000;
     private BluetoothHandler mBluetoothHandler;
@@ -151,6 +151,13 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, V
 
             }
         });
+        Button speakButton = (Button) findViewById(R.id.speechButton);
+        speakButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                voiceRecognitionTest.startRecording();
+            }
+        });
     }
 
     private void startLocalizationUpdates(){
@@ -239,13 +246,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, V
 
 
     private VoiceRecognition voiceRecognitionTest;
-
-    @Override
-    public void onClick(View v) {
-        if(v.getId() == R.id.speechButton){
-            voiceRecognitionTest.startRecording();
-        }
-    }
 
     public void speechEndedSuccesfullEvent(ArrayList<Enum> commands){
         Log.d("Speech",commands.toString());

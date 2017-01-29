@@ -28,9 +28,7 @@ public class VoiceRecognition {
     {
         this.mainActivity = mainActivity;
         mainActivity.setContentView(R.layout.activity_main);
-        Button speakButton = (Button) mainActivity.findViewById(R.id.speechButton);
         mText = (TextView) mainActivity.findViewById(R.id.speechResult);
-        speakButton.setOnClickListener(mainActivity);
         sr = SpeechRecognizer.createSpeechRecognizer(mainActivity);
         sr.setRecognitionListener(new listener());
         speechAnalyser = new SpeechAnalyser();
