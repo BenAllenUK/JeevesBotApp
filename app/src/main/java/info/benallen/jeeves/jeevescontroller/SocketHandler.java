@@ -60,7 +60,7 @@ public class SocketHandler {
 
         EventData eventData = new EventData("location", posData);
         String json = mGson.toJson(eventData);
-        Log.d(TAG, json);
+        Log.d(TAG, "Updating position with: " + json);
         mWebSocket.send(json);
     }
 
