@@ -248,6 +248,16 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private VoiceRecognition voiceRecognitionTest;
 
     public void speechEndedSuccesfullEvent(ArrayList<Enum> commands){
+        Button requestBtn = (Button) findViewById(R.id.ardBtn);
+        EditText editText = (EditText) findViewById(R.id.destinationText);
+        for (Enum receiver:commands){
+            if(receiver instanceof SpeechAnalyser.Subject){
+                editText.setText(String.valueOf(receiver.ordinal()));
+            }
+        }
+
+//        requestBtn.performClick();
+
         Log.d("Speech",commands.toString());
     }
 
