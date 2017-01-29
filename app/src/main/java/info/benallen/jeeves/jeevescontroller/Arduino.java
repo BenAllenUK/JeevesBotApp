@@ -4,9 +4,6 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.os.Bundle;
-import android.widget.EditText;
-import android.widget.TextView;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,28 +13,11 @@ import java.util.Set;
 import java.util.UUID;
 
 public class Arduino extends Activity {
-
-    TextView myLabel;
-    EditText myTextbox;
     BluetoothAdapter mBluetoothAdapter;
     BluetoothSocket mmSocket;
     BluetoothDevice mmDevice;
     OutputStream mmOutputStream;
     InputStream mmInputStream;
-    Thread workerThread;
-    byte[] readBuffer;
-    int readBufferPosition;
-    volatile boolean stopWorker;
-
-    private boolean readBufferBool = false;
-    private String readBufferString = "";
-
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-
-
-    }
 
     void findBT() {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -73,7 +53,6 @@ public class Arduino extends Activity {
     }
 
     void closeBT() throws IOException {
-        stopWorker = true;
         mmOutputStream.close();
         mmInputStream.close();
         mmSocket.close();
