@@ -67,7 +67,9 @@ public class Arduino extends Activity {
         "Travel X" - Distance for Jeeves to travel: where X is a distance in meters.
      */
     void sendData(String request) throws IOException {
-        mmOutputStream.write(request.getBytes(Charset.forName("UTF-8")));
+        if (mmOutputStream != null){
+            mmOutputStream.write(request.getBytes(Charset.forName("UTF-8")));
+        }
     }
 
     void closeBT() throws IOException {
