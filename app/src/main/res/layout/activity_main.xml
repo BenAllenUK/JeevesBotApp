@@ -57,4 +57,22 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="34dp" />
+
+    <TextView
+        android:text="TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button"
+        android:layout_alignEnd="@+id/debugText"
+        android:layout_marginTop="26dp"
+        android:id="@+id/speechResult" />
+
+    <Button
+        android:text="SPEECH"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/speechResult"
+        android:layout_alignStart="@+id/ardBtn"
+        android:id="@+id/speechButton"
+        android:layout_alignEnd="@+id/ardBtn" />
 </RelativeLayout>

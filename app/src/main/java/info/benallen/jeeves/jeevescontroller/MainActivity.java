@@ -25,13 +25,14 @@ import org.altbeacon.beacon.service.RssiFilter;
 import org.altbeacon.beacon.service.RunningAverageRssiFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-public class MainActivity extends AppCompatActivity implements BeaconConsumer {
+public class MainActivity extends AppCompatActivity implements BeaconConsumer, View.OnClickListener {
     private final String TAG = "Main";
     private final int interval = 1000;
     private BluetoothHandler mBluetoothHandler;
@@ -48,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        voiceRecognitionTest = new VoiceRecognition(this);
 
         // Start bluetooth listings
         mBluetoothHandler = new BluetoothHandler(this, new BluetoothCallback() {
@@ -233,6 +235,28 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         super.onDestroy();
 
         mBluetoothHandler.destroy(this);
+    }
+
+
+    private VoiceRecognition voiceRecognitionTest;
+
+    @Override
+    public void onClick(View v) {
+        if(v.getId() == R.id.speechButton){
+            voiceRecognitionTest.startRecording();
+        }
+    }
+
+    public void speechEndedSuccesfullEvent(ArrayList<Enum> commands){
+        Log.d("Speech",commands.toString());
+    }
+
+    public void speechEndedUnsuccessfullEvent(){
+        Log.d("Speech","No Success");
+    }
+
+    public void speechEndedWithDance(){
+        Log.d("Speech","Dance");
     }
 
 
