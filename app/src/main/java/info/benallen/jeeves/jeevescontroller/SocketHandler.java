@@ -21,7 +21,7 @@ public class SocketHandler {
     private Gson mGson = new Gson();
 
     // Connect to server
-    void connectToSocket(final SocketInterface socketInterface) {
+    void connectToSocket(final String identity, final SocketInterface socketInterface) {
         AsyncHttpClient.getDefaultInstance().websocket(URL, "jeeves", new AsyncHttpClient.WebSocketConnectCallback() {
             @Override
             public void onCompleted(Exception ex, WebSocket webSocket) {
@@ -43,7 +43,7 @@ public class SocketHandler {
                 mWebSocket = webSocket;
 
                 // Setup identity
-                setupIdentity(webSocket, "robot");
+                setupIdentity(webSocket, identity);
 
                 // Call callback to start refresh timer
                 socketInterface.onComplete(webSocket);

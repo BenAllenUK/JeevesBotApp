@@ -66,25 +66,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 
         compass = new Compass(this);
 
-        // Start socket setup
-        mSocketHandler.connectToSocket(new SocketInterface() {
-            @Override
-            public void onComplete(WebSocket webSocket) {
-                startLocalizationUpdates();
-            }
 
-            @Override
-            public void onError() {
-                Log.d(TAG, "Fuck, it fucked up");
-                Toast.makeText(MainActivity.this, "Cant connect", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onDataResponse(EventData data) {
-                onServerResponse(data);
-            }
-
-        });
 
         setEventListeners();
     }
@@ -171,11 +153,43 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 
             }
         });
+
         Button speakButton = (Button) findViewById(R.id.speechButton);
         speakButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 voiceRecognitionTest.startRecording();
+            }
+        });
+
+        Button connectBtn = (Button) findViewById(R.id.setupBtn);
+        connectBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditText nameField = (EditText) findViewById(R.id.identityTxt);
+
+                String identity = nameField.getText().toString();
+                
+                // Start socket setup
+                mSocketHandler.connectToSocket(identity, new SocketInterface() {
+                    @Override
+                    public void onComplete(WebSocket webSocket) {
+                        startLocalizationUpdates();
+                        Toast.makeText(MainActivity.this, "Connected", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError() {
+                        Log.d(TAG, "Fuck, it fucked up");
+                        Toast.makeText(MainActivity.this, "Cant connect", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onDataResponse(EventData data) {
+                        onServerResponse(data);
+                    }
+
+                });
             }
         });
     }
@@ -234,8 +248,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                 String travel = (String) genericMessage.get("travel");
 
                 try {
-                    mArduino.sendData("Turn " + turn);
-                    mArduino.sendData("Travel " + travel);
+                    mArduino.sendData("turn " + turn);
+                    mArduino.sendData("travel " + travel);
                 } catch (IOException e) {
                     Log.d(TAG, "Could not send: " + eventData.getPayload());
                     e.printStackTrace();
