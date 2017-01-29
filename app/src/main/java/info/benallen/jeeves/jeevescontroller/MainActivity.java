@@ -1,10 +1,10 @@
 package info.benallen.jeeves.jeevescontroller;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -23,9 +23,7 @@ import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.service.ArmaRssiFilter;
 import org.altbeacon.beacon.service.RunningAverageRssiFilter;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.HashMap;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -109,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             }
         });
 
-        Button requestBtn = (Button) findViewById(R.id.requestBtn);
+        Button requestBtn = (Button) findViewById(R.id.ardBtn);
         requestBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -127,6 +125,27 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                         Toast.makeText(MainActivity.this, "Failed to send", Toast.LENGTH_SHORT).show();
                     }
                 });
+            }
+        });
+
+        Button ardButton = (Button) findViewById(R.id.ardBtn);
+        ardButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Arduino myLittleArduino = new Arduino();
+
+                myLittleArduino.findBT();
+                try {
+                    myLittleArduino.openBT();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    myLittleArduino.sendData("testing");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
             }
         });
     }
@@ -212,5 +231,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 
         mBluetoothHandler.destroy(this);
     }
+
+
 }
 

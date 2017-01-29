@@ -11,15 +11,6 @@
     tools:context="info.benallen.jeeves.jeevescontroller.MainActivity">
 
     <Button
-        android:text="Requester"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="51dp"
-        android:id="@+id/requestBtn"
-        android:layout_below="@+id/destinationText"
-        android:layout_centerHorizontal="true" />
-
-    <Button
         android:text="Jeeves Face"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -44,8 +35,26 @@
         android:text="TextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/requestBtn"
+        android:layout_below="@+id/ardBtn"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="23dp"
         android:id="@+id/debugText" />
+
+    <Button
+        android:text="Requester"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="51dp"
+        android:id="@+id/button"
+        android:layout_below="@+id/destinationText"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:text="Connect Arduino"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/ardBtn"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="34dp" />
 </RelativeLayout>
