@@ -90,4 +90,22 @@
         android:layout_alignParentTop="true"
         android:layout_toStartOf="@+id/requestBtn" />
 
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:text="Name"
+        android:ems="10"
+        android:layout_alignParentTop="true"
+        android:id="@+id/identity"
+        android:layout_alignEnd="@+id/speechResult" />
+
+    <Button
+        android:text="Connect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/setupBtn"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/identity" />
+
 </RelativeLayout>

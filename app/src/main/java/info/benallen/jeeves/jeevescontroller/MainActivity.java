@@ -241,10 +241,13 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                     e.printStackTrace();
                 }
 
+                break;
+
             }
             case "message": {
                 LinkedTreeMap genericMessage = (LinkedTreeMap) eventData.getPayload();
                 Log.d(TAG, "Got a message: " + genericMessage.get("msg"));
+                break;
 
             }
             case "finished": {
@@ -252,10 +255,12 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                 Log.d(TAG, "Got a message: " + genericMessage.get("msg"));
                 MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.finished);
                 mp.start();
+                break;
 
             }
             default: {
                 // Do nothing, unknown event
+                break;
             }
         }
     }
