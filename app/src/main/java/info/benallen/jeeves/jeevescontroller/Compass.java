@@ -40,6 +40,13 @@ public class Compass implements SensorEventListener {
         sensorManager = (SensorManager) mainActivity.getSystemService(SENSOR_SERVICE);
         sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorMagneticField = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
+        sensorManager.registerListener(this,
+                sensorAccelerometer,
+                SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this,
+                sensorMagneticField,
+                SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     public float getDirection() {
@@ -49,7 +56,6 @@ public class Compass implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        Log.d("Compass","hit");
 
         switch(event.sensor.getType()){
             case Sensor.TYPE_ACCELEROMETER:
@@ -72,12 +78,12 @@ public class Compass implements SensorEventListener {
 
         if(success){
             SensorManager.getOrientation(matrixR, matrixValues);
+            float normal_dir = matrixValues[0] % (float) Math.PI * 2;
+            if(matrixValues[0] < 0){
+                matrixValues[0] = ((float) Math.PI * 2)  + matrixValues[0];
+            }
 
-            double azimuth = Math.toDegrees(matrixValues[0]);
-            double pitch = Math.toDegrees(matrixValues[1]);
-            double roll = Math.toDegrees(matrixValues[2]);
-
-            direction = matrixValues[0];
+            direction = matrixValues[0] * (180 /(float) Math.PI);
         }
 
     }

@@ -21,6 +21,7 @@ import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.service.ArmaRssiFilter;
+import org.altbeacon.beacon.service.RssiFilter;
 import org.altbeacon.beacon.service.RunningAverageRssiFilter;
 
 import java.io.IOException;
@@ -219,8 +220,10 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-        BeaconManager.setRssiFilterImplClass(ArmaRssiFilter.class);
-        RunningAverageRssiFilter.setSampleExpirationMilliseconds(1000l);
+        BeaconManager.setRssiFilterImplClass(RunningAverageRssiFilter.class);
+        mBluetoothHandler.getBeaconManager().setForegroundScanPeriod(50);
+        mBluetoothHandler.getBeaconManager().setForegroundBetweenScanPeriod(10);
+        RunningAverageRssiFilter.setSampleExpirationMilliseconds(50);
         mBluetoothHandler.getBeaconManager().setMonitorNotifier(mBluetoothHandler);
         mBluetoothHandler.getBeaconManager().setRangeNotifier(mBluetoothHandler);
     }
